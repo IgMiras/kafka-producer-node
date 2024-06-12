@@ -11,15 +11,15 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
 const server = createServer(app);
-const io = Server(server);
+const io = new Server(server);
 
 const redisClient = redis.createClient();
 const getAsync = promisify(redisClient.get).bind(redisClient);
 const setAsync = promisify(redisClient.set).bind(redisClient);
-const lpushAsync = promisify(redisClient.lpush).bind(redisClient);
-const lrangeAsync = promisify(redisClient.lrange).bind(redisClient);
+const lpushAsync = promisify(redisClient.lPush).bind(redisClient);
+const lrangeAsync = promisify(redisClient.lRange).bind(redisClient);
 
-app.post('/api/send', controllers.sendMessageToKafka, io.emit('newOcurrence'));
+app.post('/api/send', controllers.sendMessageToKafka);
 
 // Evento de conexão do Socket.io
 io.on('connection', async (socket) => {

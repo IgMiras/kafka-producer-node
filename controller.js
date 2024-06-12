@@ -3,7 +3,7 @@ import redis from 'redis';
 import { promisify } from 'node:util';
 
 const redisClient = redis.createClient();
-const lpushAsync = promisify(redisClient.lpush).bind(redisClient);
+const lpushAsync = promisify(redisClient.lPush).bind(redisClient);
 
 const sendMessageToKafka = async (req, res) => {
 	try {
