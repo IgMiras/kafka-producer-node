@@ -1,16 +1,18 @@
-import KafkaConfig from './config.js';
-import redis from 'redis';
-import { promisify } from 'node:util';
+import KafkaConfig from './kafkaConfig.js';
 
-const redisClient = redis.createClient();
-const lpushAsync = promisify(redisClient.lPush).bind(redisClient);
+let client;
+
+const init = (redisClient) => {
+	client = redisClient;
+	console.log('client atribuido, :', client);
+};
 
 const sendMessageToKafka = async (req, res) => {
 	try {
 		const occurrence = req.body;
 
 		// add occurrence to Redis
-		await lpushAsync('ocurrences', JSON.stringify(occurrence));
+		await client.lPush('occurrences', JSON.stringify(occurrence));
 
 		const kafkaConfig = new KafkaConfig();
 		const messages = [
@@ -20,13 +22,17 @@ const sendMessageToKafka = async (req, res) => {
 		await kafkaConfig.produce('my-topic', messages);
 
 		res.status(200).json({
-			message: 'Message sucessfully send!',
+			message: 'Message successfully sent!',
 		});
 	} catch (err) {
 		console.log(err);
+		res.status(500).json({
+			message: 'An error occurred',
+			error: err.message,
+		});
 	}
 };
 
-const controllers = { sendMessageToKafka };
+const controllers = { init, sendMessageToKafka };
 
 export default controllers;
